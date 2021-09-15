@@ -71,6 +71,53 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-codable-ignorekey" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2021/09/15/codable-ignorekey/" class="article-date">
+  <time class="dt-published" datetime="2021-09-15T08:04:50.955Z" itemprop="datePublished">2021-09-15</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2021/09/15/codable-ignorekey/">Codable模型映射中使用@propertyWrapper特性忽略指定key的解析</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h2 id="问题简介"><a href="#问题简介" class="headerlink" title="问题简介"></a>问题简介</h2><ul>
+<li>在swift中使用Codable进行数据解析时有时候需要忽略那些不需要进行decode的key</li>
+</ul>
+<h2 id="解决问题的思路"><a href="#解决问题的思路" class="headerlink" title="解决问题的思路"></a>解决问题的思路</h2><ul>
+<li>重写指定key的decode和encode过程到达忽略的效果</li>
+</ul>
+<h2 id="代码实例"><a href="#代码实例" class="headerlink" title="代码实例"></a>代码实例</h2><h3 id="定义IgnoreKey"><a href="#定义IgnoreKey" class="headerlink" title="定义IgnoreKey"></a>定义IgnoreKey</h3> <figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">@propertyWrapper</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">CodableIgnoreKey</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">var</span> value: <span class="type">T</span>?</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">var</span> wrappedValue: <span class="type">T</span>? &#123;</span><br><span class="line">        <span class="keyword">get</span> &#123; value &#125;</span><br><span class="line">        <span class="keyword">set</span> &#123;</span><br><span class="line">            <span class="keyword">self</span>.value <span class="operator">=</span> newValue</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">init</span>(<span class="params">wrappedValue</span>: <span class="type">T</span>?)</span> &#123;</span><br><span class="line">        <span class="keyword">self</span>.value <span class="operator">=</span> wrappedValue</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="重写CodableIgnoreKey的encode和decode过程"><a href="#重写CodableIgnoreKey的encode和decode过程" class="headerlink" title="重写CodableIgnoreKey的encode和decode过程"></a>重写CodableIgnoreKey的encode和decode过程</h3> <figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">extension</span> <span class="title">CodableIgnoreKey</span>: <span class="title">Codable</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">func</span> <span class="title">encode</span>(<span class="params">to</span> <span class="params">encoder</span>: <span class="type">Encoder</span>)</span> <span class="keyword">throws</span> &#123;</span><br><span class="line">        <span class="comment">// nothing to do in encode process</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">init</span>(<span class="params">from</span> <span class="params">decoder</span>: <span class="type">Decoder</span>)</span> <span class="keyword">throws</span> &#123;</span><br><span class="line">        <span class="comment">// nothing to do in decode process</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h3> <figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">Model</span>: <span class="title">Codable</span> </span>&#123;</span><br><span class="line">    <span class="keyword">let</span> key1: <span class="type">String</span>?</span><br><span class="line">    <span class="keyword">let</span> key2: <span class="type">String</span>?</span><br><span class="line">    <span class="comment">// 忽略key3的decode和encode</span></span><br><span class="line">    <span class="meta">@CodableIgnoreKey</span> <span class="keyword">let</span> key3: <span class="type">String</span>?</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2021/09/15/codable-ignorekey/" data-id="cktl89ivr00000fy6c4woa3ge" data-title="Codable模型映射中使用@propertyWrapper特性忽略指定key的解析" class="article-share-link">Teilen</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-codable-dafaultvalue" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2021/09/14/codable-dafaultvalue/" class="article-date">
@@ -245,6 +292,10 @@
     <h3 class="widget-title">letzter Beitrag</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2021/09/15/codable-ignorekey/">Codable模型映射中使用@propertyWrapper特性忽略指定key的解析</a>
+          </li>
         
           <li>
             <a href="/2021/09/14/codable-dafaultvalue/">Codable模型映射中使用@propertyWrapper特性提供默认值</a>
