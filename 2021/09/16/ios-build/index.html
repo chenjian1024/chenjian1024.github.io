@@ -4,13 +4,17 @@
   <meta charset="utf-8">
   
   
-  <title>Hexo</title>
+  <title>iOS项目编译脚本 | Hexo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="Hexo">
-<meta property="og:url" content="http://example.com/index.html">
+  <meta name="description" content="背景 使用xcode打包上传到itunes中间需要手动选择签名文件的步骤比较繁琐和浪费时间  解决问题的思路 使用shell语言将iOS项目的编译,导出ipa包,签名校验, 上传流程封装成脚本实现一键搞定。  代码实例编译过程 12345678910111213141516171819202122232425262728293031323334353637383940414243444546474">
+<meta property="og:type" content="article">
+<meta property="og:title" content="iOS项目编译脚本">
+<meta property="og:url" content="http://example.com/2021/09/16/ios-build/index.html">
 <meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="背景 使用xcode打包上传到itunes中间需要手动选择签名文件的步骤比较繁琐和浪费时间  解决问题的思路 使用shell语言将iOS项目的编译,导出ipa包,签名校验, 上传流程封装成脚本实现一键搞定。  代码实例编译过程 12345678910111213141516171819202122232425262728293031323334353637383940414243444546474">
 <meta property="og:locale">
+<meta property="article:published_time" content="2021-09-16T05:38:28.218Z">
+<meta property="article:modified_time" content="2021-09-16T07:00:38.853Z">
 <meta property="article:author" content="Jian Chen">
 <meta name="twitter:card" content="summary">
   
@@ -69,9 +73,7 @@
 </header>
 
       <div class="outer">
-        <section id="main">
-  
-    <article id="post-ios-build" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+        <section id="main"><article id="post-ios-build" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2021/09/16/ios-build/" class="article-date">
   <time class="dt-published" datetime="2021-09-16T05:38:28.218Z" itemprop="datePublished">2021-09-16</time>
@@ -84,8 +86,8 @@
       <header class="article-header">
         
   
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2021/09/16/ios-build/">iOS项目编译脚本</a>
+    <h1 class="p-name article-title" itemprop="headline name">
+      iOS项目编译脚本
     </h1>
   
 
@@ -126,296 +128,19 @@
     </footer>
   </div>
   
-</article>
-
-
-
+    
+<nav id="article-nav">
   
-    <article id="post-dictionary-nullvalue" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2021/09/16/dictionary-nullvalue/" class="article-date">
-  <time class="dt-published" datetime="2021-09-16T02:54:06.626Z" itemprop="datePublished">2021-09-16</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
   
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2021/09/16/dictionary-nullvalue/">Dictionary剔除null值避免在存储的时候发生崩溃</a>
-    </h1>
+    <a href="/2021/09/16/dictionary-nullvalue/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Älter</strong>
+      <div class="article-nav-title">Dictionary剔除null值避免在存储的时候发生崩溃</div>
+    </a>
   
+</nav>
 
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <h2 id="问题简介"><a href="#问题简介" class="headerlink" title="问题简介"></a>问题简介</h2><ul>
-<li>将[String: Any]类型存储到UserDefaults时如果包含null值会导致崩溃</li>
-</ul>
-<h2 id="解决问题的思路"><a href="#解决问题的思路" class="headerlink" title="解决问题的思路"></a>解决问题的思路</h2><ul>
-<li>在存储前剔除null值</li>
-</ul>
-<h2 id="代码实例"><a href="#代码实例" class="headerlink" title="代码实例"></a>代码实例</h2> <figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">extension</span> <span class="title">Dictionary</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 剔除null值</span></span><br><span class="line">    <span class="function"><span class="keyword">func</span> <span class="title">temmingNullValue</span>()</span> -&gt; <span class="type">Dictionary</span> &#123;</span><br><span class="line">        <span class="keyword">var</span> temp <span class="operator">=</span> <span class="keyword">self</span></span><br><span class="line">        <span class="type">Array</span>(<span class="keyword">self</span>.keys).filter &#123; key <span class="keyword">in</span></span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">self</span>[key] <span class="keyword">is</span> <span class="type">NSNull</span></span><br><span class="line">        &#125;.forEach &#123; nullKey <span class="keyword">in</span></span><br><span class="line">            temp.removeValue(forKey: nullKey)</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> temp</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2021/09/16/dictionary-nullvalue/" data-id="cktmcg3vi0000a7y633kag7cw" data-title="Dictionary剔除null值避免在存储的时候发生崩溃" class="article-share-link">Teilen</a>
-      
-      
-      
-    </footer>
-  </div>
   
 </article>
-
-
-
-  
-    <article id="post-codable-enumassociatevalue" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2021/09/15/codable-enumassociatevalue/" class="article-date">
-  <time class="dt-published" datetime="2021-09-15T08:32:25.425Z" itemprop="datePublished">2021-09-15</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2021/09/15/codable-enumassociatevalue/">Codable处理带值的枚举</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <h2 id="问题简介"><a href="#问题简介" class="headerlink" title="问题简介"></a>问题简介</h2><ul>
-<li>在swift中使用Codable直接enum associate value 类型处理时会报错</li>
-</ul>
-<h2 id="解决问题的思路"><a href="#解决问题的思路" class="headerlink" title="解决问题的思路"></a>解决问题的思路</h2><ul>
-<li>手动实现enum 的decode和encode过程</li>
-</ul>
-<h2 id="代码实例"><a href="#代码实例" class="headerlink" title="代码实例"></a>代码实例</h2><h3 id="define"><a href="#define" class="headerlink" title="define"></a>define</h3> <figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">enum</span> <span class="title">ExampleState</span> </span>&#123;</span><br><span class="line">    <span class="keyword">case</span> empty</span><br><span class="line">    <span class="keyword">case</span> single(value: <span class="type">String</span>)</span><br><span class="line">    <span class="keyword">case</span> mulit(selectedId: <span class="type">UUID</span>, expandedItems: [<span class="type">String</span>])</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// custome codingkey</span></span><br><span class="line"><span class="class"><span class="keyword">extension</span> <span class="title">ExampleState</span> </span>&#123;</span><br><span class="line">    <span class="class"><span class="keyword">enum</span> <span class="title">CodingKeys</span>: <span class="title">CodingKey</span> </span>&#123;</span><br><span class="line">        <span class="keyword">case</span> empty, single, mulit</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="encode"><a href="#encode" class="headerlink" title="encode"></a>encode</h3> <figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// encode</span></span><br><span class="line"><span class="class"><span class="keyword">extension</span> <span class="title">ExampleState</span>: <span class="title">Encodable</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">func</span> <span class="title">encode</span>(<span class="params">to</span> <span class="params">encoder</span>: <span class="type">Encoder</span>)</span> <span class="keyword">throws</span> &#123;</span><br><span class="line">        <span class="keyword">var</span> container <span class="operator">=</span> encoder.container(keyedBy: <span class="type">CodingKeys</span>.<span class="keyword">self</span>)</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">switch</span> <span class="keyword">self</span> &#123;</span><br><span class="line">        <span class="keyword">case</span> .empty:</span><br><span class="line">            <span class="keyword">try</span> container.encode(<span class="literal">true</span>, forKey: .empty)</span><br><span class="line">        <span class="keyword">case</span> .single(<span class="keyword">let</span> value):</span><br><span class="line">            <span class="keyword">try</span> container.encode(value, forKey: .single)</span><br><span class="line">        <span class="keyword">case</span> .mulit(<span class="keyword">let</span> selectedID, <span class="keyword">let</span> expandedItems):</span><br><span class="line">            <span class="keyword">var</span> nestedContainer <span class="operator">=</span> container.nestedUnkeyedContainer(forKey: .mulit)</span><br><span class="line">            <span class="keyword">try</span> nestedContainer.encode(selectedID)</span><br><span class="line">            <span class="keyword">try</span> nestedContainer.encode(expandedItems)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// example encode</span></span><br><span class="line"><span class="keyword">let</span> encoder <span class="operator">=</span> <span class="type">JSONEncoder</span>()</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> state <span class="operator">=</span> <span class="type">ExampleState</span>.mulit(</span><br><span class="line">    selectedId: <span class="type">UUID</span>(),</span><br><span class="line">    expandedItems: [<span class="type">Item</span>(name: <span class="string">&quot;Request 1&quot;</span>), <span class="type">Item</span>(name: <span class="string">&quot;Request 2&quot;</span>)]</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">do</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> stateData <span class="operator">=</span> <span class="keyword">try</span> encoder.encode(state)</span><br><span class="line">    <span class="keyword">let</span> stateString <span class="operator">=</span> <span class="type">String</span>(data: stateData, encoding: .utf8)</span><br><span class="line">    <span class="built_in">print</span>(stateString <span class="operator">??</span> <span class="string">&quot;Wrong data&quot;</span>)</span><br><span class="line">&#125; <span class="keyword">catch</span> &#123;</span><br><span class="line">    <span class="built_in">print</span>(error.localizedDescription)</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<h3 id="decode"><a href="#decode" class="headerlink" title="decode"></a>decode</h3> <figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">extension</span> <span class="title">ExampleState</span>: <span class="title">Decodable</span> </span>&#123;</span><br><span class="line"><span class="comment">// decode</span></span><br><span class="line"><span class="function"><span class="keyword">init</span>(<span class="params">from</span> <span class="params">decoder</span>: <span class="type">Decoder</span>)</span> <span class="keyword">throws</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> container <span class="operator">=</span> <span class="keyword">try</span> decoder.container(keyedBy: <span class="type">CodingKeys</span>.<span class="keyword">self</span>)</span><br><span class="line">    <span class="keyword">let</span> key <span class="operator">=</span> container.allKeys.first</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">switch</span> key &#123;</span><br><span class="line">    <span class="keyword">case</span> .empty:</span><br><span class="line">        <span class="keyword">self</span> <span class="operator">=</span> .empty</span><br><span class="line">    <span class="keyword">case</span> .single:</span><br><span class="line">        <span class="keyword">let</span> value <span class="operator">=</span> <span class="keyword">try</span> container.decode(</span><br><span class="line">            <span class="type">String</span>.<span class="keyword">self</span>,</span><br><span class="line">            forKey: .single</span><br><span class="line">        )</span><br><span class="line">        <span class="keyword">self</span> <span class="operator">=</span> .single(value: value)</span><br><span class="line">    <span class="keyword">case</span> .mulit:</span><br><span class="line">        <span class="keyword">var</span> nestedContainer <span class="operator">=</span> <span class="keyword">try</span> container.nestedUnkeyedContainer(forKey: .mulit)</span><br><span class="line">        <span class="keyword">let</span> selectedId <span class="operator">=</span> <span class="keyword">try</span> nestedContainer.decode(<span class="type">UUID</span>.<span class="keyword">self</span>)</span><br><span class="line">        <span class="keyword">let</span> expandedItems <span class="operator">=</span> <span class="keyword">try</span> nestedContainer.decode([<span class="type">Item</span>].<span class="keyword">self</span>)</span><br><span class="line">        <span class="keyword">self</span> <span class="operator">=</span> .mulit(</span><br><span class="line">            selectedId: selectedId,</span><br><span class="line">            expandedItems: expandedItems</span><br><span class="line">        )</span><br><span class="line">    <span class="keyword">default</span>:</span><br><span class="line">        <span class="keyword">throw</span> <span class="type">DecodingError</span>.dataCorrupted(</span><br><span class="line">            <span class="type">DecodingError</span>.<span class="type">Context</span>(</span><br><span class="line">                codingPath: container.codingPath,</span><br><span class="line">                debugDescription: <span class="string">&quot;Unabled to decode enum.&quot;</span></span><br><span class="line">            )</span><br><span class="line">        )</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// example decode</span></span><br><span class="line"><span class="keyword">let</span> decoder <span class="operator">=</span> <span class="type">JSONDecoder</span>()</span><br><span class="line"></span><br><span class="line"><span class="keyword">do</span> &#123;</span><br><span class="line">   <span class="keyword">let</span> state <span class="operator">=</span> <span class="keyword">try</span> decoder.decode(<span class="type">ExampleState</span>.<span class="keyword">self</span>, from: stateData)</span><br><span class="line">&#125; <span class="keyword">catch</span> &#123;</span><br><span class="line">    <span class="built_in">print</span>(error.localizedDescription)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="优化"><a href="#优化" class="headerlink" title="优化"></a>优化</h3> <figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"> </span><br><span class="line"> <span class="class"><span class="keyword">extension</span> <span class="title">KeyedEncodingContainer</span> </span>&#123;</span><br><span class="line">     <span class="keyword">mutating</span> <span class="function"><span class="keyword">func</span> <span class="title">encodeValues</span>&lt;<span class="type">V1</span>: <span class="type">Encodable</span>, <span class="type">V2</span>: <span class="type">Encodable</span>&gt;(</span></span><br><span class="line"><span class="function">         <span class="keyword">_</span> <span class="params">v1</span>: <span class="type">V1</span>,</span></span><br><span class="line"><span class="function">         <span class="keyword">_</span> <span class="params">v2</span>: <span class="type">V2</span>,</span></span><br><span class="line"><span class="function">         <span class="params">for</span> <span class="params">key</span>: <span class="type">Key</span>)</span> <span class="keyword">throws</span> &#123;</span><br><span class="line"></span><br><span class="line">         <span class="keyword">var</span> container <span class="operator">=</span> <span class="keyword">self</span>.nestedUnkeyedContainer(forKey: key)</span><br><span class="line">         <span class="keyword">try</span> container.encode(v1)</span><br><span class="line">         <span class="keyword">try</span> container.encode(v2)</span><br><span class="line">     &#125;</span><br><span class="line"> &#125;</span><br><span class="line"></span><br><span class="line"> <span class="class"><span class="keyword">extension</span> <span class="title">KeyedDecodingContainer</span> </span>&#123;</span><br><span class="line">     <span class="function"><span class="keyword">func</span> <span class="title">decodeValues</span>&lt;<span class="type">V1</span>: <span class="type">Decodable</span>, <span class="type">V2</span>: <span class="type">Decodable</span>&gt;(</span></span><br><span class="line"><span class="function">         <span class="params">for</span> <span class="params">key</span>: <span class="type">Key</span>)</span> <span class="keyword">throws</span> -&gt; (<span class="type">V1</span>, <span class="type">V2</span>) &#123;</span><br><span class="line"></span><br><span class="line">         <span class="keyword">var</span> container <span class="operator">=</span> <span class="keyword">try</span> <span class="keyword">self</span>.nestedUnkeyedContainer(forKey: key)</span><br><span class="line">         <span class="keyword">return</span> (</span><br><span class="line">             <span class="keyword">try</span> container.decode(<span class="type">V1</span>.<span class="keyword">self</span>),</span><br><span class="line">             <span class="keyword">try</span> container.decode(<span class="type">V2</span>.<span class="keyword">self</span>)</span><br><span class="line">         )</span><br><span class="line">     &#125;</span><br><span class="line"> &#125;</span><br><span class="line"> </span><br><span class="line"> <span class="comment">// example</span></span><br><span class="line"> </span><br><span class="line"> <span class="comment">// encode</span></span><br><span class="line"> <span class="keyword">case</span> .mulit(<span class="keyword">let</span> selectedID, <span class="keyword">let</span> expandedItems):</span><br><span class="line">     <span class="keyword">try</span> container.encodeValues(selectedID, expandedItems, for: .mulit)</span><br><span class="line">     </span><br><span class="line"><span class="comment">// decode</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">case</span> .mulit:</span><br><span class="line">    <span class="keyword">let</span> (selectedId, expandedItems): (<span class="type">UUID</span>, [<span class="type">Item</span>]) <span class="operator">=</span> <span class="keyword">try</span> container.decodeValues(for: .mulit)</span><br><span class="line">    <span class="keyword">self</span> <span class="operator">=</span> .mulit(selectedId: selectedId, expandedItems: expandedItems)</span><br><span class="line"> </span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2021/09/15/codable-enumassociatevalue/" data-id="cktlaszrb0000tgy649145yw5" data-title="Codable处理带值的枚举" class="article-share-link">Teilen</a>
-      
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
-    <article id="post-codable-ignorekey" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2021/09/15/codable-ignorekey/" class="article-date">
-  <time class="dt-published" datetime="2021-09-15T08:04:50.955Z" itemprop="datePublished">2021-09-15</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2021/09/15/codable-ignorekey/">Codable模型映射中使用@propertyWrapper特性忽略指定key的解析</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <h2 id="问题简介"><a href="#问题简介" class="headerlink" title="问题简介"></a>问题简介</h2><ul>
-<li>在swift中使用Codable进行数据解析时有时候需要忽略那些不需要进行decode的key</li>
-</ul>
-<h2 id="解决问题的思路"><a href="#解决问题的思路" class="headerlink" title="解决问题的思路"></a>解决问题的思路</h2><ul>
-<li>重写指定key的decode和encode过程到达忽略的效果</li>
-</ul>
-<h2 id="代码实例"><a href="#代码实例" class="headerlink" title="代码实例"></a>代码实例</h2><h3 id="定义IgnoreKey"><a href="#定义IgnoreKey" class="headerlink" title="定义IgnoreKey"></a>定义IgnoreKey</h3> <figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">@propertyWrapper</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">CodableIgnoreKey</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">var</span> value: <span class="type">T</span>?</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">var</span> wrappedValue: <span class="type">T</span>? &#123;</span><br><span class="line">        <span class="keyword">get</span> &#123; value &#125;</span><br><span class="line">        <span class="keyword">set</span> &#123;</span><br><span class="line">            <span class="keyword">self</span>.value <span class="operator">=</span> newValue</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">init</span>(<span class="params">wrappedValue</span>: <span class="type">T</span>?)</span> &#123;</span><br><span class="line">        <span class="keyword">self</span>.value <span class="operator">=</span> wrappedValue</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="重写CodableIgnoreKey的encode和decode过程"><a href="#重写CodableIgnoreKey的encode和decode过程" class="headerlink" title="重写CodableIgnoreKey的encode和decode过程"></a>重写CodableIgnoreKey的encode和decode过程</h3> <figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">extension</span> <span class="title">CodableIgnoreKey</span>: <span class="title">Codable</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">func</span> <span class="title">encode</span>(<span class="params">to</span> <span class="params">encoder</span>: <span class="type">Encoder</span>)</span> <span class="keyword">throws</span> &#123;</span><br><span class="line">        <span class="comment">// nothing to do in encode process</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">init</span>(<span class="params">from</span> <span class="params">decoder</span>: <span class="type">Decoder</span>)</span> <span class="keyword">throws</span> &#123;</span><br><span class="line">        <span class="comment">// nothing to do in decode process</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h3> <figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">Model</span>: <span class="title">Codable</span> </span>&#123;</span><br><span class="line">    <span class="keyword">let</span> key1: <span class="type">String</span>?</span><br><span class="line">    <span class="keyword">let</span> key2: <span class="type">String</span>?</span><br><span class="line">    <span class="comment">// 忽略key3的decode和encode</span></span><br><span class="line">    <span class="meta">@CodableIgnoreKey</span> <span class="keyword">let</span> key3: <span class="type">String</span>?</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2021/09/15/codable-ignorekey/" data-id="cktl89ivr00000fy6c4woa3ge" data-title="Codable模型映射中使用@propertyWrapper特性忽略指定key的解析" class="article-share-link">Teilen</a>
-      
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
-    <article id="post-codable-dafaultvalue" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2021/09/14/codable-dafaultvalue/" class="article-date">
-  <time class="dt-published" datetime="2021-09-14T02:52:43.412Z" itemprop="datePublished">2021-09-14</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2021/09/14/codable-dafaultvalue/">Codable模型映射中使用@propertyWrapper特性提供默认值</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <h2 id="问题简介"><a href="#问题简介" class="headerlink" title="问题简介"></a>问题简介</h2><ul>
-<li>在swift编程中使用Codable可以简化model转换过程,减少代码的书写。但是在实际的开发过程中因为服务端返回的json数据存在null的时候可能导致模型中的子节点解析为nil最终导致整个模型解析失败</li>
-</ul>
-<h2 id="解决问题的思路"><a href="#解决问题的思路" class="headerlink" title="解决问题的思路"></a>解决问题的思路</h2><ul>
-<li>通过给可能出现null值的字段在decode阶段提供一个默认值让decode阶段进行</li>
-</ul>
-<h2 id="代码实例"><a href="#代码实例" class="headerlink" title="代码实例"></a>代码实例</h2><h3 id="定义Default"><a href="#定义Default" class="headerlink" title="定义Default"></a>定义Default</h3> <figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">@propertyWrapper</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">Default</span>&lt;<span class="title">T</span>: <span class="title">DefaultValue</span>&gt; </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> wrappedValue: <span class="type">T</span>.<span class="type">Value</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/// 解决decode 时key类型不符的情况</span></span><br><span class="line"><span class="class"><span class="keyword">extension</span> <span class="title">Default</span>: <span class="title">Codable</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">init</span>(<span class="params">from</span> <span class="params">decoder</span>: <span class="type">Decoder</span>)</span> <span class="keyword">throws</span> &#123;</span><br><span class="line">        <span class="keyword">let</span> containner <span class="operator">=</span> <span class="keyword">try</span> decoder.singleValueContainer()</span><br><span class="line">        wrappedValue <span class="operator">=</span> (<span class="keyword">try?</span> containner.decode(<span class="type">T</span>.<span class="type">Value</span>.<span class="keyword">self</span>)) <span class="operator">??</span> <span class="type">T</span>.defaultValue</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/// 解决decode 时key缺失的情况</span></span><br><span class="line"><span class="class"><span class="keyword">extension</span> <span class="title">KeyedDecodingContainer</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">func</span> <span class="title">decode</span>&lt;<span class="type">T</span>&gt;(<span class="keyword">_</span> <span class="params">type</span>: <span class="type">Default</span>&lt;<span class="type">T</span>&gt;.<span class="keyword">Type</span>,</span></span><br><span class="line"><span class="function">                   <span class="params">forKey</span> <span class="params">key</span>: <span class="type">Key</span>)</span> <span class="keyword">throws</span> -&gt; <span class="type">Default</span>&lt;<span class="type">T</span>&gt; <span class="keyword">where</span> <span class="type">T</span>: <span class="type">DefaultValue</span> &#123;</span><br><span class="line">        <span class="keyword">try</span> decodeIfPresent(type, forKey: key) <span class="operator">??</span> <span class="type">Default</span>(wrappedValue: <span class="type">T</span>.defaultValue)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">extension</span> <span class="title">Default</span> </span>&#123;</span><br><span class="line">    <span class="keyword">typealias</span> <span class="type">True</span> <span class="operator">=</span> <span class="type">Default</span>&lt;<span class="type">Bool</span>.<span class="type">True</span>&gt;</span><br><span class="line">    <span class="keyword">typealias</span> <span class="type">False</span> <span class="operator">=</span> <span class="type">Default</span>&lt;<span class="type">Bool</span>.<span class="type">False</span>&gt;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="定义-DefaultValue"><a href="#定义-DefaultValue" class="headerlink" title="定义 DefaultValue"></a>定义 DefaultValue</h3> <figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">protocol</span> <span class="title">DefaultValue</span> </span>&#123;</span><br><span class="line">    <span class="keyword">associatedtype</span> <span class="type">Value</span>: <span class="type">Codable</span></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">var</span> defaultValue: <span class="type">Value</span> &#123; <span class="keyword">get</span> &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">extension</span> <span class="title">Bool</span> </span>&#123;</span><br><span class="line">    <span class="class"><span class="keyword">enum</span> <span class="title">False</span>: <span class="title">DefaultValue</span> </span>&#123;</span><br><span class="line">        <span class="keyword">static</span> <span class="keyword">let</span> defaultValue <span class="operator">=</span> <span class="literal">false</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="class"><span class="keyword">enum</span> <span class="title">True</span>: <span class="title">DefaultValue</span> </span>&#123;</span><br><span class="line">        <span class="keyword">static</span> <span class="keyword">let</span> defaultValue <span class="operator">=</span> <span class="literal">true</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h3> <figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">enum</span> <span class="title">EnumType</span>: <span class="title">String</span>, <span class="title">Codable</span>, <span class="title">DefaultValue</span> </span>&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">case</span> type1 <span class="operator">=</span> <span class="string">&quot;type1&quot;</span></span><br><span class="line">    <span class="keyword">case</span> type2 <span class="operator">=</span> <span class="string">&quot;type2&quot;</span></span><br><span class="line">    <span class="keyword">case</span> type3 <span class="operator">=</span> <span class="string">&quot;type3&quot;</span></span><br><span class="line">    <span class="keyword">case</span> unknown <span class="operator">=</span> <span class="string">&quot;UNKNOWN&quot;</span></span><br><span class="line">    <span class="keyword">var</span> descprition: <span class="type">String</span>? &#123;</span><br><span class="line">        <span class="keyword">switch</span> <span class="keyword">self</span> &#123;</span><br><span class="line">        <span class="keyword">case</span> .type1:</span><br><span class="line">            <span class="keyword">return</span> <span class="string">&quot;VOICE&quot;</span></span><br><span class="line">        <span class="keyword">case</span> .type2:</span><br><span class="line">            <span class="keyword">return</span> <span class="string">&quot;HEALTH&quot;</span></span><br><span class="line">        <span class="keyword">case</span> .type3:</span><br><span class="line">            <span class="keyword">return</span> <span class="string">&quot;PRIVILEGE&quot;</span></span><br><span class="line">        <span class="keyword">case</span> .unknown:</span><br><span class="line">            <span class="keyword">return</span> <span class="string">&quot;UNKNOWN&quot;</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">let</span> defaultValue <span class="operator">=</span> <span class="type">EnumType</span>.unknown</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">Model</span>: <span class="title">Codable</span> </span>&#123;</span><br><span class="line">    <span class="keyword">let</span> key1: <span class="type">String</span>?</span><br><span class="line">    <span class="keyword">let</span> key2: <span class="type">String</span>?</span><br><span class="line">    <span class="keyword">let</span> key3: <span class="type">String</span>?</span><br><span class="line">    <span class="meta">@Default</span><span class="operator">&lt;</span><span class="type">EnumType</span><span class="operator">&gt;</span> <span class="keyword">var</span> code: <span class="type">EnumType</span></span><br><span class="line">    <span class="meta">@Default</span>.<span class="type">False</span> <span class="keyword">var</span> <span class="keyword">open</span>: <span class="type">Bool</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2021/09/14/codable-dafaultvalue/" data-id="cktji4ffv0000sey66bt58cxo" data-title="Codable模型映射中使用@propertyWrapper特性提供默认值" class="article-share-link">Teilen</a>
-      
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
-    <article id="post-hello-world" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2021/09/13/hello-world/" class="article-date">
-  <time class="dt-published" datetime="2021-09-13T09:29:14.745Z" itemprop="datePublished">2021-09-13</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2021/09/13/hello-world/">Hexo安装和部署教程</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <p> Hexo 是一个轻量级的blog开源框架 <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a>!<br> 通过安装Hexo和部署到github上搭建一个基于MarkDown语法的个人Blog<br> <a target="_blank" rel="noopener" href="https://hexo.io/zh-cn/docs/">Hexo中文教程</a></p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="安装Node-js"><a href="#安装Node-js" class="headerlink" title="安装Node.js"></a>安装Node.js</h3><ul>
-<li>通过官网直接下载Node的.pkg包</li>
-</ul>
-<ul>
-<li><a target="_blank" rel="noopener" href="http://nodejs.cn/download/">中文官网</a></li>
-<li><a target="_blank" rel="noopener" href="https://nodejs.org/en/download/">官网</a></li>
-</ul>
-<ul>
-<li>利用Homebrew安装(简称brew,MacOSX上的软件包管理工具，能在Mac中方便的安装软件或者卸载软件)</li>
-</ul>
-<ul>
-<li>打开终端，执行以下命令安装Homebrew</li>
-</ul>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ ruby -e <span class="string">&quot;<span class="subst">$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)</span>&quot;</span></span><br><span class="line">$ brew install node   //sudo 使用admin权限</span><br></pre></td></tr></table></figure>
-<ul>
-<li>安装成功后<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ node -v:查看node版本</span><br><span class="line">$ npm -v：查看npm版本</span><br></pre></td></tr></table></figure>
-<h3 id="升级Node和npm"><a href="#升级Node和npm" class="headerlink" title="升级Node和npm"></a>升级Node和npm</h3></li>
-</ul>
-<ol>
-<li>利用Node.js的多版本管理器n<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ sudo npm cache clean -f //清除nodejs的cache：</span><br><span class="line">$ sudo npm install -g n //使用npm安装n模块</span><br><span class="line">$ npm view node versions // node所有版本</span><br><span class="line">$ sudo n latest // 升级到最新版本</span><br><span class="line">$ sudo n stable // 升级到稳定版本</span><br><span class="line">$ sudo n xx.xx // 升级到具体版本号</span><br></pre></td></tr></table></figure></li>
-<li>利用brew升级<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">$ brew update</span><br><span class="line">(1).更新homebrew,如果出现The /usr/<span class="built_in">local</span> directory is not writable.则需要更改权限 ，然后输入：sudo chown -R $(whoami) /usr/<span class="built_in">local</span></span><br><span class="line">(2).升级完以后，会弹出这个</span><br><span class="line">Homebrew no longer needs to have ownership of /usr/<span class="built_in">local</span>. If you wish you can</span><br><span class="line"><span class="built_in">return</span> /usr/<span class="built_in">local</span> to its default ownership with </span><br><span class="line">$ sudo chown root:wheel /usr/<span class="built_in">local</span></span><br><span class="line">(3). 按提示输入下边的命令，更改会原来的权限</span><br><span class="line">$ sudo chown root:wheel /usr/<span class="built_in">local</span></span><br><span class="line">--------------------</span><br><span class="line">接下来更新node</span><br><span class="line">$ brew upgrade node</span><br></pre></td></tr></table></figure>
-<h3 id="使用-npm-来便捷安装-Hexo"><a href="#使用-npm-来便捷安装-Hexo" class="headerlink" title="使用 npm 来便捷安装 Hexo"></a>使用 npm 来便捷安装 Hexo</h3></li>
-</ol>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ npm install -g hexo-cli</span><br></pre></td></tr></table></figure>
-
-<h3 id="Hexo-初始化"><a href="#Hexo-初始化" class="headerlink" title="Hexo 初始化"></a>Hexo 初始化</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo init xxx （xxx是你自己的定义的文件夹名称）</span><br></pre></td></tr></table></figure>
-
-<h3 id="Hexo-项目集成"><a href="#Hexo-项目集成" class="headerlink" title="Hexo 项目集成"></a>Hexo 项目集成</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">cd</span> xxx</span><br><span class="line">$ npm install (将Hexo框架需要的资源文件下载到xxx目录)</span><br></pre></td></tr></table></figure>
-<h3 id="启动项目"><a href="#启动项目" class="headerlink" title="启动项目"></a>启动项目</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo s</span><br></pre></td></tr></table></figure>
-<h3 id="验证是否启动成功：访问-http-localhost-4000"><a href="#验证是否启动成功：访问-http-localhost-4000" class="headerlink" title="验证是否启动成功：访问 http://localhost:4000"></a>验证是否启动成功：访问 <a target="_blank" rel="noopener" href="http://localhost:4000/">http://localhost:4000</a></h3><h3 id="创建GitHub-仓库"><a href="#创建GitHub-仓库" class="headerlink" title="创建GitHub 仓库"></a>创建GitHub 仓库</h3><p>在GitHub主页中创建一个 public repo </p>
-<p>Repository name: username.github.io</p>
-<h3 id="修改部署配置"><a href="#修改部署配置" class="headerlink" title="修改部署配置"></a>修改部署配置</h3><ol>
-<li>打开xxx文件下的_config.yml文件</li>
-<li>编辑如下字段<br>deploy:<br>type: git<br>repo:  <a target="_blank" rel="noopener" href="https://github.com/username/username.github.io.git">https://github.com/username/username.github.io.git</a><br>branch: master</li>
-</ol>
-<h3 id="将对应的资源文件部署到GitHub"><a href="#将对应的资源文件部署到GitHub" class="headerlink" title="将对应的资源文件部署到GitHub"></a>将对应的资源文件部署到GitHub</h3><ul>
-<li><a target="_blank" rel="noopener" href="https://hexo.io/zh-cn/docs/one-command-deployment">详细说明</a><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">cd</span> xxx</span><br><span class="line">$ hexo d -g</span><br></pre></td></tr></table></figure>
-<h3 id="问题处理"><a href="#问题处理" class="headerlink" title="问题处理"></a>问题处理</h3></li>
-<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_41010198/article/details/119698015">repo无法访问</a></li>
-</ul>
-<h3 id="部署路径问题"><a href="#部署路径问题" class="headerlink" title="部署路径问题"></a>部署路径问题</h3><ol>
-<li>设置 GitHub Pages 的目录</li>
-</ol>
-<ul>
-<li> setting-&gt;pages-&gt;source 为/(root)</li>
-</ul>
-<ol start="2">
-<li> 修改部署配置文件_config.yml</li>
-</ol>
-<ul>
-<li>index_generator:</li>
-<li>path: ‘’</li>
-</ul>
-<h3 id="验证是否部署成功"><a href="#验证是否部署成功" class="headerlink" title="验证是否部署成功"></a>验证是否部署成功</h3><ul>
-<li><a target="_blank" rel="noopener" href="http://username.github.io/">访问</a></li>
-</ul>
-<h3 id="hexo-init-报错"><a href="#hexo-init-报错" class="headerlink" title="hexo init 报错"></a>hexo init 报错</h3><ul>
-<li>升级 Node.js到最新版本</li>
-</ul>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2021/09/13/hello-world/" data-id="cktji4fg00001sey68wn92dk4" data-title="Hexo安装和部署教程" class="article-share-link">Teilen</a>
-      
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
 
 
 </section>
