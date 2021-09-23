@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>Dictionary内部实现探究 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="问题简介 研究swift语言中Dictionary的内部实现细节  Dictionary source code Dictionary   1234567891011121314151617181920212223242526272829303132333435363738394041424344454647484950515253545556575859606162636465666768697">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Dictionary内部实现探究">
+<meta property="og:url" content="http://example.com/2021/09/23/dictionary-exploration/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="问题简介 研究swift语言中Dictionary的内部实现细节  Dictionary source code Dictionary   1234567891011121314151617181920212223242526272829303132333435363738394041424344454647484950515253545556575859606162636465666768697">
+<meta property="og:locale">
+<meta property="article:published_time" content="2021-09-23T03:04:45.827Z">
+<meta property="article:modified_time" content="2021-09-23T03:24:19.240Z">
+<meta property="article:author" content="Jian Chen">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Suche"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Suche"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-dictionary-exploration" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2021/09/23/dictionary-exploration/" class="article-date">
+  <time class="dt-published" datetime="2021-09-23T03:04:45.827Z" itemprop="datePublished">2021-09-23</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      Dictionary内部实现探究
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h2 id="问题简介"><a href="#问题简介" class="headerlink" title="问题简介"></a>问题简介</h2><ul>
+<li>研究swift语言中Dictionary的内部实现细节</li>
+</ul>
+<h2 id="Dictionary-source-code"><a href="#Dictionary-source-code" class="headerlink" title="Dictionary source code"></a>Dictionary source code</h2><ul>
+<li>Dictionary</li>
+</ul>
+ <figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br></pre></td><td class="code"><pre><span class="line"> </span><br><span class="line"> <span class="keyword">@frozen</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">struct</span> <span class="title">Dictionary</span>&lt;<span class="title">Key</span>: <span class="title">Hashable</span>, <span class="title">Value</span>&gt; </span>&#123;</span><br><span class="line">  <span class="comment">/// The element type of a dictionary: a tuple containing an individual</span></span><br><span class="line">  <span class="comment">/// key-value pair.</span></span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">typealias</span> <span class="type">Element</span> <span class="operator">=</span> (key: <span class="type">Key</span>, value: <span class="type">Value</span>)</span><br><span class="line"></span><br><span class="line">  <span class="keyword">@usableFromInline</span></span><br><span class="line">  <span class="keyword">internal</span> <span class="keyword">var</span> _variant: _Variant</span><br><span class="line"></span><br><span class="line">  <span class="keyword">@inlinable</span></span><br><span class="line">  <span class="keyword">internal</span> <span class="function"><span class="keyword">init</span>(<span class="params">_native</span>: __owned _NativeDictionary<span class="operator">&lt;</span><span class="type">Key</span>, <span class="type">Value</span><span class="operator">&gt;</span>)</span> &#123;</span><br><span class="line">    _variant <span class="operator">=</span> _Variant(native: _native)</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">#if</span> _runtime(_ObjC)</span><br><span class="line">  <span class="keyword">@inlinable</span></span><br><span class="line">  <span class="keyword">internal</span> <span class="function"><span class="keyword">init</span>(<span class="params">_cocoa</span>: __owned __CocoaDictionary)</span> &#123;</span><br><span class="line">    _variant <span class="operator">=</span> _Variant(cocoa: _cocoa)</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/// Private initializer used for bridging.</span></span><br><span class="line">  <span class="comment">///</span></span><br><span class="line">  <span class="comment">/// Only use this initializer when both conditions are true:</span></span><br><span class="line">  <span class="comment">///</span></span><br><span class="line">  <span class="comment">/// * it is statically known that the given `NSDictionary` is immutable;</span></span><br><span class="line">  <span class="comment">/// * `Key` and `Value` are bridged verbatim to Objective-C (i.e.,</span></span><br><span class="line">  <span class="comment">///   are reference types).</span></span><br><span class="line">  <span class="keyword">@inlinable</span></span><br><span class="line">  <span class="keyword">public</span> <span class="comment">// SPI(Foundation)</span></span><br><span class="line">  <span class="function"><span class="keyword">init</span>(<span class="params">_immutableCocoaDictionary</span>: __owned <span class="type">AnyObject</span>)</span> &#123;</span><br><span class="line">    _internalInvariant(</span><br><span class="line">      _isBridgedVerbatimToObjectiveC(<span class="type">Key</span>.<span class="keyword">self</span>) <span class="operator">&amp;&amp;</span></span><br><span class="line">      _isBridgedVerbatimToObjectiveC(<span class="type">Value</span>.<span class="keyword">self</span>),</span><br><span class="line">      <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">      Dictionary can be backed by NSDictionary buffer only when both Key <span class="subst">\</span></span></span><br><span class="line"><span class="subst"><span class="string"></span>      and Value are bridged verbatim to Objective-C</span></span><br><span class="line"><span class="string">      &quot;&quot;&quot;</span>)</span><br><span class="line">    <span class="keyword">self</span>.<span class="keyword">init</span>(_cocoa: __CocoaDictionary(_immutableCocoaDictionary))</span><br><span class="line">  &#125;</span><br><span class="line"><span class="keyword">#endif</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">/// Creates an empty dictionary.</span></span><br><span class="line">  <span class="keyword">@inlinable</span></span><br><span class="line">  <span class="keyword">public</span> <span class="function"><span class="keyword">init</span>()</span> &#123;</span><br><span class="line">    <span class="keyword">self</span>.<span class="keyword">init</span>(_native: _NativeDictionary())</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/// Creates an empty dictionary with preallocated space for at least the</span></span><br><span class="line">  <span class="comment">/// specified number of elements.</span></span><br><span class="line">  <span class="comment">///</span></span><br><span class="line">  <span class="comment">/// Use this initializer to avoid intermediate reallocations of a dictionary&#x27;s</span></span><br><span class="line">  <span class="comment">/// storage buffer when you know how many key-value pairs you are adding to a</span></span><br><span class="line">  <span class="comment">/// dictionary after creation.</span></span><br><span class="line">  <span class="comment">///</span></span><br><span class="line">  <span class="comment">/// - Parameter minimumCapacity: The minimum number of key-value pairs that</span></span><br><span class="line">  <span class="comment">///   the newly created dictionary should be able to store without</span></span><br><span class="line">  <span class="comment">///   reallocating its storage buffer.</span></span><br><span class="line">  <span class="keyword">public</span> <span class="comment">// FIXME(reserveCapacity): Should be inlinable</span></span><br><span class="line">  <span class="function"><span class="keyword">init</span>(<span class="params">minimumCapacity</span>: <span class="type">Int</span>)</span> &#123;</span><br><span class="line">    _variant <span class="operator">=</span> _Variant(native: _NativeDictionary(capacity: minimumCapacity))</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/// Creates a new dictionary from the key-value pairs in the given sequence.</span></span><br><span class="line">  <span class="comment">///</span></span><br><span class="line">  <span class="comment">/// You use this initializer to create a dictionary when you have a sequence</span></span><br><span class="line">  <span class="comment">/// of key-value tuples with unique keys. Passing a sequence with duplicate</span></span><br><span class="line">  <span class="comment">/// keys to this initializer results in a runtime error. If your</span></span><br><span class="line">  <span class="comment">/// sequence might have duplicate keys, use the</span></span><br><span class="line">  <span class="comment">/// `Dictionary(_:uniquingKeysWith:)` initializer instead.</span></span><br><span class="line">  <span class="comment">///</span></span><br><span class="line">  <span class="comment">/// The following example creates a new dictionary using an array of strings</span></span><br><span class="line">  <span class="comment">/// as the keys and the integers in a countable range as the values:</span></span><br><span class="line">  <span class="comment">///</span></span><br><span class="line">  <span class="comment">///     let digitWords = [&quot;one&quot;, &quot;two&quot;, &quot;three&quot;, &quot;four&quot;, &quot;five&quot;]</span></span><br><span class="line">  <span class="comment">///     let wordToValue = Dictionary(uniqueKeysWithValues: zip(digitWords, 1...5))</span></span><br><span class="line">  <span class="comment">///     print(wordToValue[&quot;three&quot;]!)</span></span><br><span class="line">  <span class="comment">///     // Prints &quot;3&quot;</span></span><br><span class="line">  <span class="comment">///     print(wordToValue)</span></span><br><span class="line">  <span class="comment">///     // Prints &quot;[&quot;three&quot;: 3, &quot;four&quot;: 4, &quot;five&quot;: 5, &quot;one&quot;: 1, &quot;two&quot;: 2]&quot;</span></span><br><span class="line">  <span class="comment">///</span></span><br><span class="line">  <span class="comment">/// - Parameter keysAndValues: A sequence of key-value pairs to use for</span></span><br><span class="line">  <span class="comment">///   the new dictionary. Every key in `keysAndValues` must be unique.</span></span><br><span class="line">  <span class="comment">/// - Returns: A new dictionary initialized with the elements of</span></span><br><span class="line">  <span class="comment">///   `keysAndValues`.</span></span><br><span class="line">  <span class="comment">/// - Precondition: The sequence must not have duplicate keys.</span></span><br><span class="line">  <span class="keyword">@inlinable</span></span><br><span class="line">  <span class="keyword">public</span> <span class="function"><span class="keyword">init</span>&lt;<span class="type">S</span>: <span class="type">Sequence</span>&gt;(</span></span><br><span class="line"><span class="function">    <span class="params">uniqueKeysWithValues</span> <span class="params">keysAndValues</span>: __owned <span class="type">S</span></span></span><br><span class="line"><span class="function">  )</span> <span class="keyword">where</span> <span class="type">S</span>.<span class="type">Element</span> <span class="operator">==</span> (<span class="type">Key</span>, <span class="type">Value</span>) &#123;</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">let</span> d <span class="operator">=</span> keysAndValues <span class="keyword">as?</span> <span class="type">Dictionary</span>&lt;<span class="type">Key</span>, <span class="type">Value</span>&gt; &#123;</span><br><span class="line">      <span class="keyword">self</span> <span class="operator">=</span> d</span><br><span class="line">      <span class="keyword">return</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">var</span> native <span class="operator">=</span> _NativeDictionary<span class="operator">&lt;</span><span class="type">Key</span>, <span class="type">Value</span><span class="operator">&gt;</span>(</span><br><span class="line">      capacity: keysAndValues.underestimatedCount)</span><br><span class="line">    <span class="comment">// &#x27;_MergeError.keyCollision&#x27; is caught and handled with an appropriate</span></span><br><span class="line">    <span class="comment">// error message one level down, inside native.merge(_:...). We throw an</span></span><br><span class="line">    <span class="comment">// error instead of calling fatalError() directly because we want the</span></span><br><span class="line">    <span class="comment">// message to include the duplicate key, and the closure only has access to</span></span><br><span class="line">    <span class="comment">// the conflicting values.</span></span><br><span class="line">    <span class="keyword">try!</span> native.merge(</span><br><span class="line">      keysAndValues,</span><br><span class="line">      isUnique: <span class="literal">true</span>,</span><br><span class="line">      uniquingKeysWith: &#123; <span class="keyword">_</span>, <span class="keyword">_</span> <span class="keyword">in</span> <span class="keyword">throw</span> _MergeError.keyCollision &#125;)</span><br><span class="line">    <span class="keyword">self</span>.<span class="keyword">init</span>(_native: native)</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/// Creates a new dictionary from the key-value pairs in the given sequence,</span></span><br><span class="line">  <span class="comment">/// using a combining closure to determine the value for any duplicate keys.</span></span><br><span class="line">  <span class="comment">///</span></span><br><span class="line">  <span class="comment">/// You use this initializer to create a dictionary when you have a sequence</span></span><br><span class="line">  <span class="comment">/// of key-value tuples that might have duplicate keys. As the dictionary is</span></span><br><span class="line">  <span class="comment">/// built, the initializer calls the `combine` closure with the current and</span></span><br><span class="line">  <span class="comment">/// new values for any duplicate keys. Pass a closure as `combine` that</span></span><br><span class="line">  <span class="comment">/// returns the value to use in the resulting dictionary: The closure can</span></span><br><span class="line">  <span class="comment">/// choose between the two values, combine them to produce a new value, or</span></span><br><span class="line">  <span class="comment">/// even throw an error.</span></span><br><span class="line">  <span class="comment">///</span></span><br><span class="line">  <span class="comment">/// The following example shows how to choose the first and last values for</span></span><br><span class="line">  <span class="comment">/// any duplicate keys:</span></span><br><span class="line">  <span class="comment">///</span></span><br><span class="line">  <span class="comment">///     let pairsWithDuplicateKeys = [(&quot;a&quot;, 1), (&quot;b&quot;, 2), (&quot;a&quot;, 3), (&quot;b&quot;, 4)]</span></span><br><span class="line">  <span class="comment">///</span></span><br><span class="line">  <span class="comment">///     let firstValues = Dictionary(pairsWithDuplicateKeys,</span></span><br><span class="line">  <span class="comment">///                                  uniquingKeysWith: &#123; (first, _) in first &#125;)</span></span><br><span class="line">  <span class="comment">///     // [&quot;b&quot;: 2, &quot;a&quot;: 1]</span></span><br><span class="line">  <span class="comment">///</span></span><br><span class="line">  <span class="comment">///     let lastValues = Dictionary(pairsWithDuplicateKeys,</span></span><br><span class="line">  <span class="comment">///                                 uniquingKeysWith: &#123; (_, last) in last &#125;)</span></span><br><span class="line">  <span class="comment">///     // [&quot;b&quot;: 4, &quot;a&quot;: 3]</span></span><br><span class="line">  <span class="comment">///</span></span><br><span class="line">  <span class="comment">/// - Parameters:</span></span><br><span class="line">  <span class="comment">///   - keysAndValues: A sequence of key-value pairs to use for the new</span></span><br><span class="line">  <span class="comment">///     dictionary.</span></span><br><span class="line">  <span class="comment">///   - combine: A closure that is called with the values for any duplicate</span></span><br><span class="line">  <span class="comment">///     keys that are encountered. The closure returns the desired value for</span></span><br><span class="line">  <span class="comment">///     the final dictionary.</span></span><br><span class="line">  <span class="keyword">@inlinable</span></span><br><span class="line">  <span class="keyword">public</span> <span class="function"><span class="keyword">init</span>&lt;<span class="type">S</span>: <span class="type">Sequence</span>&gt;(</span></span><br><span class="line"><span class="function">    <span class="keyword">_</span> <span class="params">keysAndValues</span>: __owned <span class="type">S</span>,</span></span><br><span class="line"><span class="function">    <span class="params">uniquingKeysWith</span> <span class="params">combine</span>: (<span class="type">Value</span>, <span class="type">Value</span>) <span class="keyword">throws</span> -&gt; <span class="type">Value</span></span></span><br><span class="line"><span class="function">  )</span> <span class="keyword">rethrows</span> <span class="keyword">where</span> <span class="type">S</span>.<span class="type">Element</span> <span class="operator">==</span> (<span class="type">Key</span>, <span class="type">Value</span>) &#123;</span><br><span class="line">    <span class="keyword">var</span> native <span class="operator">=</span> _NativeDictionary<span class="operator">&lt;</span><span class="type">Key</span>, <span class="type">Value</span><span class="operator">&gt;</span>(</span><br><span class="line">      capacity: keysAndValues.underestimatedCount)</span><br><span class="line">    <span class="keyword">try</span> native.merge(keysAndValues, isUnique: <span class="literal">true</span>, uniquingKeysWith: combine)</span><br><span class="line">    <span class="keyword">self</span>.<span class="keyword">init</span>(_native: native)</span><br><span class="line">  &#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<ul>
+<li>负责存储数据的两种类型</li>
+</ul>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">_NativeDictionary<span class="operator">&lt;</span><span class="type">Key</span>, <span class="type">Value</span><span class="operator">&gt;</span></span><br><span class="line"></span><br><span class="line">__CocoaDictionary</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<ul>
+<li><p>内部属性internal var _variant: _Variant（_Variant）</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">  <span class="keyword">@frozen</span></span><br><span class="line">  <span class="keyword">internal</span> <span class="class"><span class="keyword">struct</span> <span class="title">_Variant</span> </span>&#123;</span><br><span class="line">    <span class="keyword">@usableFromInline</span></span><br><span class="line">    <span class="keyword">internal</span> <span class="keyword">var</span> object: _BridgeStorage<span class="operator">&lt;</span>__RawDictionaryStorage<span class="operator">&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">@inlinable</span></span><br><span class="line">    <span class="meta">@inline</span>(__always)</span><br><span class="line">    <span class="function"><span class="keyword">init</span>(<span class="params">native</span>: __owned _NativeDictionary<span class="operator">&lt;</span><span class="type">Key</span>, <span class="type">Value</span><span class="operator">&gt;</span>)</span> &#123;</span><br><span class="line">      <span class="keyword">self</span>.object <span class="operator">=</span> _BridgeStorage(native: native._storage)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">@inlinable</span></span><br><span class="line">    <span class="meta">@inline</span>(__always)</span><br><span class="line">    <span class="function"><span class="keyword">init</span>(<span class="params">dummy</span>: <span class="type">Void</span>)</span> &#123;</span><br><span class="line"><span class="keyword">#if</span> arch(i386) <span class="operator">||</span> arch(arm) <span class="operator">||</span> arch(arm64_32) <span class="operator">||</span> arch(wasm32)</span><br><span class="line">      <span class="keyword">self</span>.<span class="keyword">init</span>(native: _NativeDictionary())</span><br><span class="line"><span class="keyword">#else</span></span><br><span class="line">      <span class="keyword">self</span>.object <span class="operator">=</span> _BridgeStorage(taggedPayload: <span class="number">0</span>)</span><br><span class="line"><span class="keyword">#endif</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">#if</span> _runtime(_ObjC)</span><br><span class="line">    <span class="keyword">@inlinable</span></span><br><span class="line">    <span class="meta">@inline</span>(__always)</span><br><span class="line">    <span class="function"><span class="keyword">init</span>(<span class="params">cocoa</span>: __owned __CocoaDictionary)</span> &#123;</span><br><span class="line">      <span class="keyword">self</span>.object <span class="operator">=</span> _BridgeStorage(objC: cocoa.object)</span><br><span class="line">    &#125;</span><br><span class="line"><span class="keyword">#endif</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><p>storage内部实现(__RawDictionaryStorage)</p>
+</li>
+</ul>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">internal</span> <span class="class"><span class="keyword">class</span> <span class="title">__RawDictionaryStorage</span>: <span class="title">__SwiftNativeNSDictionary</span> </span>&#123;</span><br><span class="line">  <span class="comment">// <span class="doctag">NOTE:</span> The precise layout of this type is relied on in the runtime to</span></span><br><span class="line">  <span class="comment">// provide a statically allocated empty singleton.  See</span></span><br><span class="line">  <span class="comment">// stdlib/public/stubs/GlobalObjects.cpp for details.</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">/// The current number of occupied entries in this dictionary.</span></span><br><span class="line">  <span class="keyword">@usableFromInline</span></span><br><span class="line">  <span class="keyword">@nonobjc</span></span><br><span class="line">  <span class="keyword">internal</span> <span class="keyword">final</span> <span class="keyword">var</span> _count: <span class="type">Int</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">/// The maximum number of elements that can be inserted into this set without</span></span><br><span class="line">  <span class="comment">/// exceeding the hash table&#x27;s maximum load factor.</span></span><br><span class="line">  <span class="keyword">@usableFromInline</span></span><br><span class="line">  <span class="keyword">@nonobjc</span></span><br><span class="line">  <span class="keyword">internal</span> <span class="keyword">final</span> <span class="keyword">var</span> _capacity: <span class="type">Int</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">/// The scale of this dictionary. The number of buckets is 2 raised to the</span></span><br><span class="line">  <span class="comment">/// power of `scale`.</span></span><br><span class="line">  <span class="keyword">@usableFromInline</span></span><br><span class="line">  <span class="keyword">@nonobjc</span></span><br><span class="line">  <span class="keyword">internal</span> <span class="keyword">final</span> <span class="keyword">var</span> _scale: <span class="type">Int8</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">/// The scale corresponding to the highest `reserveCapacity(_:)` call so far,</span></span><br><span class="line">  <span class="comment">/// or 0 if there were none. This may be used later to allow removals to</span></span><br><span class="line">  <span class="comment">/// resize storage.</span></span><br><span class="line">  <span class="comment">///</span></span><br><span class="line">  <span class="comment">/// <span class="doctag">FIXME:</span> &lt;rdar://problem/18114559&gt; Shrink storage on deletion</span></span><br><span class="line">  <span class="keyword">@usableFromInline</span></span><br><span class="line">  <span class="keyword">@nonobjc</span></span><br><span class="line">  <span class="keyword">internal</span> <span class="keyword">final</span> <span class="keyword">var</span> _reservedScale: <span class="type">Int8</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">// Currently unused, set to zero.</span></span><br><span class="line">  <span class="keyword">@nonobjc</span></span><br><span class="line">  <span class="keyword">internal</span> <span class="keyword">final</span> <span class="keyword">var</span> _extra: <span class="type">Int16</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">/// A mutation count, enabling stricter index validation.</span></span><br><span class="line">  <span class="keyword">@usableFromInline</span></span><br><span class="line">  <span class="keyword">@nonobjc</span></span><br><span class="line">  <span class="keyword">internal</span> <span class="keyword">final</span> <span class="keyword">var</span> _age: <span class="type">Int32</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">/// The hash seed used to hash elements in this dictionary instance.</span></span><br><span class="line">  <span class="keyword">@usableFromInline</span></span><br><span class="line">  <span class="keyword">internal</span> <span class="keyword">final</span> <span class="keyword">var</span> _seed: <span class="type">Int</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">/// A raw pointer to the start of the tail-allocated hash buffer holding keys.</span></span><br><span class="line">  <span class="keyword">@usableFromInline</span></span><br><span class="line">  <span class="keyword">@nonobjc</span></span><br><span class="line">  <span class="keyword">internal</span> <span class="keyword">final</span> <span class="keyword">var</span> _rawKeys: <span class="type">UnsafeMutableRawPointer</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">/// A raw pointer to the start of the tail-allocated hash buffer holding</span></span><br><span class="line">  <span class="comment">/// values.</span></span><br><span class="line">  <span class="keyword">@usableFromInline</span></span><br><span class="line">  <span class="keyword">@nonobjc</span></span><br><span class="line">  <span class="keyword">internal</span> <span class="keyword">final</span> <span class="keyword">var</span> _rawValues: <span class="type">UnsafeMutableRawPointer</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">// This type is made with allocWithTailElems, so no init is ever called.</span></span><br><span class="line">  <span class="comment">// But we still need to have an init to satisfy the compiler.</span></span><br><span class="line">  <span class="keyword">@nonobjc</span></span><br><span class="line">  <span class="keyword">internal</span> <span class="function"><span class="keyword">init</span>(<span class="params">_doNotCallMe</span>: ())</span> &#123;</span><br><span class="line">    _internalInvariantFailure(<span class="string">&quot;This class cannot be directly initialized&quot;</span>)</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">@inlinable</span></span><br><span class="line">  <span class="keyword">@nonobjc</span></span><br><span class="line">  <span class="keyword">internal</span> <span class="keyword">final</span> <span class="keyword">var</span> _bucketCount: <span class="type">Int</span> &#123;</span><br><span class="line">    <span class="meta">@inline</span>(__always) <span class="keyword">get</span> &#123; <span class="keyword">return</span> <span class="number">1</span> <span class="operator">&amp;&lt;&lt;</span> _scale &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">@inlinable</span></span><br><span class="line">  <span class="keyword">@nonobjc</span></span><br><span class="line">  <span class="keyword">internal</span> <span class="keyword">final</span> <span class="keyword">var</span> _metadata: <span class="type">UnsafeMutablePointer</span>&lt;_HashTable.<span class="type">Word</span>&gt; &#123;</span><br><span class="line">    <span class="meta">@inline</span>(__always) <span class="keyword">get</span> &#123;</span><br><span class="line">      <span class="keyword">let</span> address <span class="operator">=</span> <span class="type">Builtin</span>.projectTailElems(<span class="keyword">self</span>, _HashTable.<span class="type">Word</span>.<span class="keyword">self</span>)</span><br><span class="line">      <span class="keyword">return</span> <span class="type">UnsafeMutablePointer</span>(address)</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// The _HashTable struct contains pointers into tail-allocated storage, so</span></span><br><span class="line">  <span class="comment">// this is unsafe and needs `_fixLifetime` calls in the caller.</span></span><br><span class="line">  <span class="keyword">@inlinable</span></span><br><span class="line">  <span class="keyword">@nonobjc</span></span><br><span class="line">  <span class="keyword">internal</span> <span class="keyword">final</span> <span class="keyword">var</span> _hashTable: _HashTable &#123;</span><br><span class="line">    <span class="meta">@inline</span>(__always) <span class="keyword">get</span> &#123;</span><br><span class="line">      <span class="keyword">return</span> _HashTable(words: _metadata, bucketCount: _bucketCount)</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>通过key查找value<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">    <span class="keyword">internal</span> <span class="keyword">final</span> <span class="function"><span class="keyword">func</span> <span class="title">find</span>&lt;<span class="type">Key</span>: <span class="type">Hashable</span>&gt;(<span class="keyword">_</span> <span class="params">key</span>: <span class="type">Key</span>, <span class="params">hashValue</span>: <span class="type">Int</span>)</span> -&gt; (bucket: _HashTable.<span class="type">Bucket</span>, found: <span class="type">Bool</span>) &#123;</span><br><span class="line">    <span class="keyword">let</span> hashTable <span class="operator">=</span> _hashTable</span><br><span class="line">    <span class="keyword">var</span> bucket <span class="operator">=</span> hashTable.idealBucket(forHashValue: hashValue)</span><br><span class="line">    <span class="keyword">while</span> hashTable._isOccupied(bucket) &#123;</span><br><span class="line">      <span class="keyword">if</span> uncheckedKey(at: bucket) <span class="operator">==</span> key &#123;</span><br><span class="line">        <span class="keyword">return</span> (bucket, <span class="literal">true</span>)</span><br><span class="line">      &#125;</span><br><span class="line">      bucket <span class="operator">=</span> hashTable.bucket(wrappedAfter: bucket)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> (bucket, <span class="literal">false</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2021/09/23/dictionary-exploration/" data-id="cktwkpirx00006jy62vjn4l4l" data-title="Dictionary内部实现探究" class="article-share-link">Teilen</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2021/09/16/ios-build/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Älter</strong>
+      <div class="article-nav-title">iOS项目编译脚本</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archiv</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">September 2021</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">letzter Beitrag</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2021/09/23/dictionary-exploration/">Dictionary内部实现探究</a>
+          </li>
+        
+          <li>
+            <a href="/2021/09/16/ios-build/">iOS项目编译脚本</a>
+          </li>
+        
+          <li>
+            <a href="/2021/09/16/dictionary-nullvalue/">Dictionary剔除null值避免在存储的时候发生崩溃</a>
+          </li>
+        
+          <li>
+            <a href="/2021/09/15/codable-enumassociatevalue/">Codable处理带值的枚举</a>
+          </li>
+        
+          <li>
+            <a href="/2021/09/15/codable-ignorekey/">Codable模型映射中使用@propertyWrapper特性忽略指定key的解析</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2021 Jian Chen<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.4.1.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>
