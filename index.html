@@ -71,6 +71,62 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-podPrivatelib" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2021/09/27/podPrivatelib/" class="article-date">
+  <time class="dt-published" datetime="2021-09-27T07:00:35.715Z" itemprop="datePublished">2021-09-27</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2021/09/27/podPrivatelib/">cocoapods创建私有库</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h2 id="背景简介"><a href="#背景简介" class="headerlink" title="背景简介"></a>背景简介</h2><ul>
+<li>iOS项目中将公共的基础代码进行抽取，通过cocoapods封装成库，在其他的项目中集成使用。</li>
+</ul>
+<h3 id="创建pod索引仓库"><a href="#创建pod索引仓库" class="headerlink" title="创建pod索引仓库"></a>创建pod索引仓库</h3><p> 在自有的gitserver创建一个仓库用来存放cocoapods 私有库的podspec文件(一般命名为xxxspec)</p>
+<h3 id="关联私有库和索引仓库"><a href="#关联私有库和索引仓库" class="headerlink" title="关联私有库和索引仓库"></a>关联私有库和索引仓库</h3> <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// 关联库描述和索引仓库</span><br><span class="line">pod repo add xxxSpec 刚才创建的索引仓库的git地址(eg:https://xxx.xxx.xxxSpec.git)</span><br></pre></td></tr></table></figure>
+<h3 id="创建pod-lib"><a href="#创建pod-lib" class="headerlink" title="创建pod lib"></a>创建pod lib</h3> <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">// 创建私有库</span><br><span class="line">pod lib create xxx(库名称)</span><br><span class="line">选择平台(iOS/MacOS)</span><br><span class="line">选择语言(OC/Swift)</span><br></pre></td></tr></table></figure>
+<h3 id="创建存放库源文件的仓库"><a href="#创建存放库源文件的仓库" class="headerlink" title="创建存放库源文件的仓库"></a>创建存放库源文件的仓库</h3><p> 在自有的gitserver创建一个仓库用来存放私有库的全部文件<br> 库名为(xxxxkit)</p>
+<h3 id="添加私有库的源文件"><a href="#添加私有库的源文件" class="headerlink" title="添加私有库的源文件"></a>添加私有库的源文件</h3><p> 将源文件放在Classes文件夹中</p>
+<h3 id="修改xxx-podspec-文件"><a href="#修改xxx-podspec-文件" class="headerlink" title="修改xxx.podspec 文件"></a>修改xxx.podspec 文件</h3><p> 修改.podspec文件中的 version,summary,description,source 字段<br>  source 的 为<a target="_blank" rel="noopener" href="https://xxx.xxx.xxxxkit.git(源码仓库的git地址)/">https://xxx.xxx.xxxxkit.git(源码仓库的git地址)</a></p>
+<h3 id="将私有库所有文件提交到远程源码仓库"><a href="#将私有库所有文件提交到远程源码仓库" class="headerlink" title="将私有库所有文件提交到远程源码仓库"></a>将私有库所有文件提交到远程源码仓库</h3>  <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">git add .</span><br><span class="line">git commit -m &#x27;提交源码到远端&#x27;</span><br><span class="line">git remote add origin https://xxx.xxx.xxxxkit.git</span><br><span class="line">// 关联分支</span><br><span class="line">git branch --set-upstream-to=origin/remote_branch local_branch</span><br><span class="line">// 提交</span><br><span class="line">git push -u origin remote_branch</span><br><span class="line">// 添加tag(tag 值与.podspec文件中的version字段值一致)</span><br><span class="line">git tag xxx</span><br><span class="line">git push --tags</span><br></pre></td></tr></table></figure>
+
+<h3 id="pod本地校验"><a href="#pod本地校验" class="headerlink" title="pod本地校验"></a>pod本地校验</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">1 未依赖其他私有库</span><br><span class="line">pod lib lint --allow-warnings</span><br><span class="line">2 依赖其他私有库</span><br><span class="line">pod lib lint --sources=&quot;https://github.com/CocoaPods/Specs.git,https://xxx.xxx.xxx.git&quot; --allow-warnings</span><br><span class="line">2 其他私有库也存在依赖</span><br><span class="line">pod lib lint --sources=&quot;https://github.com/CocoaPods/Specs.git,https://xxx.xxx.xxx.git&quot; --use-libraries --allow-warnings</span><br></pre></td></tr></table></figure>
+<h3 id="pod远程校验"><a href="#pod远程校验" class="headerlink" title="pod远程校验"></a>pod远程校验</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">1 未依赖其他私有库</span><br><span class="line">pod spec lint --allow-warnings</span><br><span class="line">2 依赖其他私有库</span><br><span class="line">pod spec lint --sources=&quot;https://github.com/CocoaPods/Specs.git,https://xxx.xxx.git&quot; --use-libraries --allow-warnings</span><br></pre></td></tr></table></figure>
+
+<h3 id="将-podspec文件保存到索引仓库"><a href="#将-podspec文件保存到索引仓库" class="headerlink" title="将.podspec文件保存到索引仓库"></a>将.podspec文件保存到索引仓库</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pod repo push xxxSpec（本地索引库的名称）xxx.podspec</span><br></pre></td></tr></table></figure>
+<h3 id="验证私有库"><a href="#验证私有库" class="headerlink" title="验证私有库"></a>验证私有库</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">pod repo update</span><br><span class="line">pod search xxx(私有库的名称)</span><br></pre></td></tr></table></figure>
+
+<h3 id="更新私有库"><a href="#更新私有库" class="headerlink" title="更新私有库"></a>更新私有库</h3><p>1 更新classes文件夹的源码文件<br>2 更新.podspec文件中的version<br>3 将源码提交到源码仓库<br>4 添加tag(tag值与version值一致)<br>5 pod 本地校验<br>6 pod 远程校验<br>7 pod repo push xxxSpec xxx.podspec<br>8 验证私有库</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2021/09/27/podPrivatelib/" data-id="cku2d0dng0000mny68cad312m" data-title="cocoapods创建私有库" class="article-share-link">Teilen</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-dictionary-exploration" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2021/09/23/dictionary-exploration/" class="article-date">
@@ -507,6 +563,10 @@
       <ul>
         
           <li>
+            <a href="/2021/09/27/podPrivatelib/">cocoapods创建私有库</a>
+          </li>
+        
+          <li>
             <a href="/2021/09/23/dictionary-exploration/">Dictionary内部实现探究</a>
           </li>
         
@@ -520,10 +580,6 @@
         
           <li>
             <a href="/2021/09/15/codable-enumassociatevalue/">Codable处理带值的枚举</a>
-          </li>
-        
-          <li>
-            <a href="/2021/09/15/codable-ignorekey/">Codable模型映射中使用@propertyWrapper特性忽略指定key的解析</a>
           </li>
         
       </ul>
